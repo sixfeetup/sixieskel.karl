@@ -78,6 +78,8 @@ eggs =
     repoze.postoffice
     repoze.vhm
     repozitory
+\# XXX: Remove me once a new karl comes out.
+    repoze.browserid
 dependent-scripts = true
 scripts =
     supervisord = supervisord
