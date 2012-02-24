@@ -1,0 +1,9 @@
+[buildout]
+extends = release.cfg
+
+[settings]
+db-name = c_${project_name}_testing_karl
+db-user = main_c_${project_name}_testing_karl
+db-pass = CHANGEME
+paster-host = 10.12.2.3
+env = testing

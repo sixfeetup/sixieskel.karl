@@ -1,0 +1,9 @@
+[buildout]
+extends = release.cfg
+
+[settings]
+db-name = ${project_name}_prod_karl
+paster-host = 127.0.0.1
+paster-port = 6543
+vhost-domain = example.com
+system-email-domain = \${settings:vhost-hostname}.\${settings:vhost-domain}

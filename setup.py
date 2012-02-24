@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-import os
 
 version = '1.0'
 
@@ -35,9 +34,10 @@ setup(name='sixieskel.karl',
       zip_safe=False,
       install_requires=[
           'setuptools',
-          # -*- Extra requirements: -*-
+          'sixieskel.buildout',
       ],
       entry_points="""
-      # -*- Entry points: -*-
+      [paste.paster_create_template]
+      sfu_karl_buildout = sixieskel.karl.template:KarlBuildout
       """,
       )

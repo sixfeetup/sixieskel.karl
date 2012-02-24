@@ -1,0 +1,12 @@
+[DEFAULT]
+var = %(here)s/../var
+
+[instance:${settings:instance_name}]
+dsn = dbname='${settings:db-name}' user='${settings:db-user}' host='${settings:db-host}' port='${settings:db-port}' password='${settings:db-pass}'
+repozitory_db_string = postgresql://${settings:db-user}:${settings:db-pass}@${settings:db-host}:${settings:db-port}/${settings:db-name}
+virtual_host = ${settings:vhost-hostname}.${settings:vhost-domain}:${settings:vhost-port}
+settings.system_email_domain = ${settings:system-email-domain}
+settings.offline_app_url = ${settings:system-email-domain}
+settings.system_name = ${settings:instance_name}
+settings.admin_email = ${settings:admin-email}
+settings.package = ${settings:customization-package}

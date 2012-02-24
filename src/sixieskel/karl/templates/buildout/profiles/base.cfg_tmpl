@@ -1,0 +1,191 @@
+[buildout]
+\# pin versions
+extends = versions.cfg
+versions = versions
+extensions =
+    mr.developer
+    lovely.buildouthttp
+unzip = true
+\# Empty list of cronjobs (these are set in release)
+cronjobs =
+parts =
+    var
+    karl
+    postgresqlinit
+    psycopg2
+    instances-config
+    postoffice-config
+    karlserve-config
+    karl-settings
+    evolve
+    \${:cronjobs}
+
+find-links =
+    http://karlhosting.github.com/pyramid/production
+    http://karlhosting.github.com/pyramid/staging/
+#if $project_name
+\# In order to use the private dist URL, you will need the username and
+\# password set up in the \${buildout:directory}/.httpauth file
+\#    https://dist.sixfeetup.com/private/$project_name
+#end if
+    http://dist.sixfeetup.com/public
+
+customization-packages = ${customization_package}
+
+[settings]
+db-name = ${project_name}_local_karl
+db-user = ${project_name}
+db-pass = ${db_password}
+db-host = localhost
+db-port = 5432
+pgsql-super = pgsql
+paster-host = 0.0.0.0
+paster-port = 51110
+instance_name = ${instance_name}
+customization-package = ${customization_package}
+maildir = \${buildout:directory}/var/mailin
+vhost-domain = example.com
+vhost-hostname = \${:env}.\${:instance_name}
+vhost-port = 80
+admin-email = qatest@sixfeetup.com
+env = local
+system-email-domain = \${settings:vhost-hostname}.\${settings:vhost-domain}
+throttle-period = 300
+
+[var]
+recipe = z3c.recipe.mkdir
+paths =
+    var/log
+    var/mailin
+
+[sources]
+#if $customization_package
+${customization_package} = git https://git.sixfeetup.com/git/${project_name}/${customization_package}.git
+#end if
+
+[karl]
+recipe = zc.recipe.egg
+unzip = true
+eggs =
+    karl
+    \${buildout:customization-packages}
+    repoze.debug
+    supervisor
+    karlserve
+    guillotine
+    RelStorage
+    repoze.pgtextindex
+    repoze.postoffice
+    repoze.vhm
+    repozitory
+dependent-scripts = true
+scripts =
+    supervisord = supervisord
+    supervisorctl = supervisorctl
+    karlserve = karlserve
+    paster = paster
+    juice_all = juice_all
+    postoffice = postoffice
+    po_debug = po_debug
+interpreter = py
+
+[postgresqlinit]
+recipe = iw.recipe.cmd
+on_install = true
+on_update = true
+find_db_sql = SELECT datname FROM pg_database WHERE datname='\${settings:db-name}';
+find_user_sql = SELECT usename FROM pg_user WHERE usename='\${settings:db-user}';
+create_user_sql = CREATE USER \${settings:db-user} WITH PASSWORD '\${settings:db-pass}';
+alter_db_sql = ALTER DATABASE \${settings:db-name} OWNER TO \${settings:db-user};
+cmds =
+    echo "STARTING databases initialization"
+    project_user=`psql -h \${settings:db-host} -p \${settings:db-port} -U \${settings:pgsql-super} -qAtX -c "\${postgresqlinit:find_user_sql}" \${settings:db-name}`
+    if [ -z "\$project_user" ]; then
+        psql -h \${settings:db-host} -p \${settings:db-port} -U \${settings:pgsql-super} postgres << EOF
+            \${postgresqlinit:create_user_sql}
+        EOF
+    fi
+    project_db=`psql -h \${settings:db-host} -p \${settings:db-port} -U \${settings:pgsql-super} -qAtX -c "\${postgresqlinit:find_db_sql}" postgres`
+    if [ -z "\$project_db" ]; then
+        echo "Creating database: \${settings:db-name}"
+        createdb -h \${settings:db-host} -p \${settings:db-port} -U \${settings:pgsql-super} -O \${settings:db-user} -E UTF8 \${settings:db-name}
+    fi
+    psql -h \${settings:db-host} -p \${settings:db-port} -U \${settings:pgsql-super} postgres << EOF
+        \${postgresqlinit:alter_db_sql}
+    EOF
+    echo "FINISHED database initialization"
+
+[psycopg2]
+recipe = zc.recipe.egg:custom
+egg = psycopg2
+define = PSYCOPG_EXTENSIONS,PSYCOPG_DISPLAY_SIZE,PSYCOPG_NEW_BOOLEAN,HAVE_PQFREEMEM,HAVE_PQPROTOCOL3
+include-dirs =
+    /opt/local/include
+    /opt/local/include/sasl
+    /usr/local/include
+    /usr/local/include/sasl
+    /usr/include
+    /usr/include/sasl
+library-dirs =
+    /opt/local/lib
+    /opt/local/lib/sasl
+    /usr/local/lib
+    /usr/local/lib/sasl
+    /usr/lib
+    /usr/lib/sasl
+rpath = \${:library-dirs}
+
+[instances-config]
+recipe = collective.recipe.template
+input = templates/instances.ini.tmpl
+output = \${buildout:directory}/etc/instances.ini
+
+[karlserve-config]
+recipe = collective.recipe.template
+input = templates/karlserve.ini.tmpl
+output = \${buildout:directory}/etc/karlserve.ini
+reload_templates = false
+debug_authorization = false
+debug_notfound = false
+debug_routematch = false
+debug_templates = false
+includes = 
+
+[postoffice-config]
+recipe = collective.recipe.template
+input = templates/postoffice.ini.tmpl
+output = \${buildout:directory}/etc/postoffice.ini
+
+[evolve]
+recipe = iw.recipe.cmd
+on_install = true
+on_update = true
+cmds =
+    echo "STARTING evolve"
+    \${buildout:directory}/bin/karlserve evolve --latest
+    echo "FINISHED evolve"
+
+[karl-settings]
+recipe = iw.recipe.cmd
+on_install = true
+# TODO: How do we handle update
+on_update = false
+cmds =
+    echo "STARTING setting up KARL"
+    \${buildout:directory}/bin/karlserve settings from_config \${settings:instance_name}
+    echo "FINISHED setting up KARL"
+
+[cron-postoffice]
+recipe = z3c.recipe.usercrontab
+times = */2 * * * *
+command = \${buildout:directory}/bin/postoffice -vv >> \${buildout:directory}/var/log/postoffice.log
+
+[cron-digest]
+recipe = z3c.recipe.usercrontab
+times = 1 */6 * * *
+command = \${buildout:directory}/bin/karlserve digest >> \${buildout:directory}/var/log/digest.log
+
+[cron-feeds]
+recipe = z3c.recipe.usercrontab
+times = */20 * * * *
+command = \${buildout:directory}/bin/karlserve feeds update >> \${buildout:directory}/var/log/feeds.log

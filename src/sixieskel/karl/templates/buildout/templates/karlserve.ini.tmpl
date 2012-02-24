@@ -1,0 +1,36 @@
+[app:karlserve]
+use = egg:karlserve#application
+instances_config = %(here)s/instances.ini
+var = %(here)s/../var
+who_secret = secret
+who_cookie = pnutbtr
+postoffice.zodb_uri = file://%(here)s/../var/postoffice.db?blobstorage_dir=%(here)s/../var/postoffice_blobs
+pyramid.reload_templates = ${reload_templates}
+pyramid.debug_authorization = ${debug_authorization}
+pyramid.debug_notfound = ${debug_notfound}
+pyramid.debug_routematch = ${debug_routematch}
+pyramid.debug_templates = ${debug_templates}
+pyramid.default_locale_name = en
+pyramid.includes = ${includes}
+
+[filter:transferlog]
+use = egg:repoze.zodbconn#transferlog
+filename = %(here)s/../log/connection_load_save.csv
+
+[filter:browserid]
+use = egg:repoze.browserid#browserid
+secret_key = ssshhhwabbits
+
+[pipeline:main]
+pipeline =
+    egg:guillotine#guillotine
+    egg:repoze.vhm#vhm_xheaders
+    egg:Paste#evalerror
+    egg:karl#timeit
+    browserid
+    karlserve
+
+[server:main]
+use = egg:Paste#http
+host = ${settings:paster-host}
+port = ${settings:paster-port}
