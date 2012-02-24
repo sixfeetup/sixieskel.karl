@@ -36,6 +36,11 @@ find-links =
 
 customization-packages = ${customization_package}
 
+[sources]
+#if $customization_package
+${customization_package} = git https://git.sixfeetup.com/git/${project_name}/${customization_package}.git
+#end if
+
 [settings]
 db-name = ${project_name}_local_karl
 db-user = ${project_name}
@@ -61,11 +66,6 @@ recipe = z3c.recipe.mkdir
 paths =
     var/log
     var/mailin
-
-[sources]
-#if $customization_package
-${customization_package} = git https://git.sixfeetup.com/git/${project_name}/${customization_package}.git
-#end if
 
 [karl]
 recipe = zc.recipe.egg
