@@ -1,6 +1,10 @@
 [buildout]
 \# pin versions
-extends = versions.cfg
+extends =
+\# Specific versions of the karl versions config are availble, we just
+\# use the latest to get started.
+    http://dist.sixfeetup.com/public/versions/karl/latest.cfg
+    versions.cfg
 versions = versions
 extensions =
     mr.developer
