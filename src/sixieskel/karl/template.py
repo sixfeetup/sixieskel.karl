@@ -1,5 +1,6 @@
 import copy
 from templer.core.base import BaseTemplate
+from templer.core.basic_namespace import BasicNamespace
 from templer.core.vars import StringVar
 from templer.core.vars import IntVar
 from sixieskel.buildout.template import run_cmd
@@ -54,3 +55,11 @@ code.
         if vars['project_name']:
             self.required_structures.append('buildouthttp')
         return result
+
+
+class KarlCustomizationPackage(BasicNamespace):
+    _template_dir = 'templates/customization'
+    summary = "A KARL customization package"
+    category = "Six Feet Up"
+    required_templates = ['basic_namespace']
+    use_cheetah = True

@@ -40,5 +40,6 @@ setup(
     entry_points="""
     [paste.paster_create_template]
     sfu_karl_buildout = sixieskel.karl.template:KarlBuildout
+    karl_custom_pkg = sixieskel.karl.template:KarlCustomizationPackage
     """,
     )

@@ -1,0 +1,3 @@
+# overall code version for ZODB state
+VERSION = 1
+NAME = '${namespace_package}.${package}'

@@ -1,0 +1,13 @@
+<configure xmlns="http://pylonshq.com/pyramid">
+
+  <resource
+      to_override="karl.views:static/"
+      override_with="${namespace_package}.${package}.views:static/"
+      />
+
+  <resource
+      to_override="karl.views:templates/"
+      override_with="${namespace_package}.${package}.views:templates/"
+      />
+
+</configure>

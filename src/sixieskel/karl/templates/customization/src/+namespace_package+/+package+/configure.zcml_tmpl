@@ -1,0 +1,25 @@
+<configure xmlns="http://pylonshq.com/pyramid">
+
+  <include package="repoze.mailin.monitor"/>
+  <include package="karl.includes"/>
+  <include package="karl.includes" file="workflow.zcml"/>
+  <include package="karl.content"/>
+
+  <include package=".views"/>
+  <include package=".evolve"/>
+
+  <includeOverrides file="overrides.zcml"/>
+
+  <!-- Add some data if you want...
+  <utility
+      factory="${namespace_package}.${package}.bootstrap.data.SampleInitialData"
+      provides="karl.bootstrap.interfaces.IInitialData"
+      />
+
+  <utility
+      factory="${namespace_package}.${package}.bootstrap.data.SampleInitialOfficeData"
+      provides="karl.bootstrap.interfaces.IInitialOfficeData"
+      />
+  -->
+
+</configure>
