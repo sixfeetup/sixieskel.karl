@@ -150,6 +150,7 @@ output = \${buildout:directory}/etc/instances.ini
 recipe = collective.recipe.template
 input = templates/karlserve.ini.tmpl
 output = \${buildout:directory}/etc/karlserve.ini
+debug = false
 reload_templates = false
 debug_authorization = false
 debug_notfound = false
