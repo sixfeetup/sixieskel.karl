@@ -60,6 +60,7 @@ admin-email = qatest@sixfeetup.com
 env = local
 system-email-domain = \${settings:vhost-hostname}.\${settings:vhost-domain}
 throttle-period = 300
+js-devel-mode = false
 
 [var]
 recipe = z3c.recipe.mkdir
