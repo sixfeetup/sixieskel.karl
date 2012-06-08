@@ -22,12 +22,16 @@ filename = %(here)s/../log/connection_load_save.csv
 use = egg:repoze.browserid#browserid
 secret_key = ssshhhwabbits
 
+[filter:paste_prefix]
+use = egg:PasteDeploy#prefix
+
 [pipeline:main]
 pipeline =
     egg:guillotine#guillotine
     egg:repoze.vhm#vhm_xheaders
     egg:Paste#evalerror
     egg:karl#timeit
+    paste_prefix
     browserid
     karlserve
 
